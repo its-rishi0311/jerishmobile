@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jerish Multi-Portal Sales, Service & Multi-Customer Chat</title>
+
+  <style>
+    /* ==========================================================================
+       1. CSS VARIABLES & THEME SETUP
+       ========================================================================== */
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: #151c2c;
+      --bg-input: #1e293b;
+      --border-color: #334155;
+      
+      --accent-primary: #38bdf8;
+      --accent-primary-hover: #0284c7;
+      --accent-success: #22c55e;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-muted: #94a3b8;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      
+      --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+      --transition-fast: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    /* Navigation Bar */
+    nav.top-bar {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portal-toggle {
+      display: flex;
+      background-color: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 4px;
+    }
+
+    .portal-toggle button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: auto;
+      transition: all var(--transition-fast);
+    }
+
+    .portal-toggle button.active {
+      background-color: var(--accent-primary);
+      color: #0b0f19;
+    }
+
+    .main-wrapper {
+      max-width: 1200px;
+      margin: 30px auto 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Page View Logic */
+    .page-view {
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+    }
+
+    /* Grids & Cards */
+    .container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 850px) {
+      .container-two-col {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .auth-card {
+      max-width: 420px;
+      margin: 40px auto;
+    }
+
+    .auth-toggle-text {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .auth-toggle-text a {
+      color: var(--accent-primary);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Form Inputs & Buttons */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    button, .btn {
+      display: inline-block;
+      text-align: center;
+      width: 100%;
+      padding: 12px 16px;
+      background-color: var(--accent-primary);
+      color: #0b0f19;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color var(--transition-fast);
+    }
+
+    button:hover, .btn:hover {
+      background-color: var(--accent-primary-hover);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      width: auto;
+      margin-bottom: 20px;
+    }
+
+    .btn-danger {
+      background-color: var(--accent-danger);
+      color: #ffffff;
+    }
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      width: auto;
+    }
+
+    /* Badges & Tables */
+    .badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-success { background: rgba(34, 197, 94, 0.15); color: var(--accent-success); border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-info { background: rgba(56, 189, 248, 0.15); color: var(--accent-primary); border: 1px solid rgba(56, 189, 248, 0.3); }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .data-table th {
+      background-color: var(--bg-input);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Catalog Cards */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .catalog-item {
+      background-color: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform var(--transition-fast), border-color var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .catalog-item:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 160px;
+      background-color: var(--bg-card);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .view-more-tag {
+      font-size: 0.75rem;
+      color: var(--accent-primary);
+      margin-top: 8px;
+      display: block;
+      text-decoration: underline;
+    }
+
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    /* Printable Job Card CSS */
+    .job-card-printable {
+      background: #ffffff;
+      color: #0f172a;
+      padding: 30px;
+      border-radius: var(--radius-md);
+      border: 2px solid #cbd5e1;
+      margin-top: 20px;
+    }
+
+    .job-card-printable h3 {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      color: #0284c7;
+    }
+
+    .printable-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .printable-grid div {
+      font-size: 0.95rem;
+    }
+
+    /* Chat UI Components with Real-time Date/Timestamp */
+    .chat-box {
+      height: 280px;
+      overflow-y: auto;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-msg {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      word-wrap: break-word;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-msg.customer {
+      align-self: flex-start;
+      background: var(--bg-input);
+      color: var(--text-main);
+    }
+
+    .chat-msg.admin {
+      align-self: flex-end;
+      background: var(--accent-primary);
+      color: #0b0f19;
+      font-weight: 500;
+    }
+
+    .chat-time {
+      font-size: 0.70rem;
+      margin-top: 4px;
+      opacity: 0.75;
+      align-self: flex-end;
+    }
+
+    .chat-msg.customer .chat-time {
+      color: var(--text-muted);
+    }
+
+    .chat-msg.admin .chat-time {
+      color: #0b0f19;
+    }
+
+    /* Cart Floating Badge & Notification Banner */
+    .cart-btn-icon {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--accent-primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      position: relative;
+    }
+
+    .cart-badge {
+      background: var(--accent-warning);
+      color: #0b0f19;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .cart-banner {
+      display: none;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid var(--accent-success);
+      color: var(--accent-success);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      margin-bottom: 15px;
+      text-align: center;
+      font-weight: 600;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Bill Receipt Styling */
+    .bill-receipt {
+      background: #ffffff;
+      color: #0b0f19;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      margin-top: 15px;
+    }
+
+    .bill-header {
+      border-bottom: 2px dashed #0b0f19;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bill-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .bill-total {
+      border-top: 2px solid #0b0f19;
+      padding-top: 10px;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #jobCardOutput, #jobCardOutput *, #printableCartBill, #printableCartBill * {
+        visibility: visible;
+      }
+      #jobCardOutput, #printableCartBill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR WITH PORTAL SWITCHER -->
+  <nav class="top-bar">
+    <div class="brand">⚡ Jerish Mobile Sales & Service</div>
+    <div class="portal-toggle">
+      <button id="btnCustomerRole" class="active" onclick="switchPortal('customer')">Customer Portal</button>
+      <button id="btnAdminRole" onclick="switchPortal('admin')">Admin / Service Portal</button>
+    </div>
+  </nav>
+
+  <div class="main-wrapper">
+
+    <!-- PORTAL 1: CUSTOMER PORTAL -->
+    <div id="customerPortal" class="page-view active">
+
+      <!-- Customer Auth View -->
+      <div id="customerAuthView" class="page-view active">
+        <div id="customerLoginForm" class="card auth-card">
+          <h2>Customer Login</h2>
+          <form onsubmit="handleCustomerLogin(event)">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="custLoginPhone" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="custLoginPass" placeholder="Enter password" required>
+            </div>
+            <button type="submit">Sign In</button>
+          </form>
+          <div class="auth-toggle-text">
+            New Customer? <a onclick="toggleCustomerAuth('register')">Create an account</a>
+          </div>
+        </div>
+
+        <div id="customerRegisterForm" class="card auth-card page-view">
+          <h2>New Customer Registration</h2>
+          <form onsubmit="handleCustomerRegister(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="custRegName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="custRegPhone" placeholder="Enter phone number" required>
+            </div>
+            <div class="form-group">
+              <label>Create Password</label>
+              <input type="password" id="custRegPass" placeholder="Create password" required>
+            </div>
+            <button type="submit">Register Account</button>
+          </form>
+          <div class="auth-toggle-text">
+            Already registered? <a onclick="toggleCustomerAuth('login')">Sign in here</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Dashboard -->
+      <div id="customerDashboardView" class="page-view">
+        <div class="user-header">
+          <div>
+            <span>Welcome, <strong id="customerNameDisplay" style="color: var(--accent-primary);">Customer</strong>!</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 10px;">(Phone: <span id="customerPhoneDisplay"></span>)</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <!-- CUSTOMER CART ICON BUTTON -->
+            <button class="cart-btn-icon" onclick="showCustomerCartView()">
+              🛒 My Cart <span id="cartItemCount" class="cart-badge">0</span>
+            </button>
+            <button class="btn-sm btn-danger" onclick="logoutCustomer()">Logout</button>
+          </div>
+        </div>
+
+        <!-- GLOBAL CART BANNER ALERT -->
+        <div id="cartBannerAlert" class="cart-banner">
+          ✅ Product added in your cart!
+        </div>
+
+        <div id="customerHomeView" class="page-view active">
+          <div class="container container-two-col">
+            <div class="card">
+              <h2>Track Your Repair Status</h2>
+              <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                  <input type="text" id="custJobSearch" placeholder="Enter Job Card Number (e.g. JOB-101)">
+                </div>
+                <button style="width: auto; padding: 0 25px;" onclick="trackCustomerJob()">Search Status</button>
+              </div>
+
+              <div id="trackResultBox" style="margin-top: 20px; display: none; background: var(--bg-main); padding: 15px; border-radius: var(--radius-md); border-left: 4px solid var(--accent-warning);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <strong id="trackDevice">Device Model</strong>
+                  <span id="trackBadge" class="badge badge-warning">In Progress</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+                  Job Card: <span id="trackJobNum">JOB-101</span> | Customer: <span id="trackCustomerName">User</span> | Cost: <span id="trackCost">₹8,500</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Register a Service Complaint</h2>
+              <form onsubmit="registerComplaint(event)">
+                <div class="form-group">
+                  <label>Category</label>
+                  <select id="complaintCategory" required>
+                    <option value="">Select Category</option>
+                    <option value="Phone Repair">Smartphone Repair Issue</option>
+                    <option value="Smartwatch Issue">Smartwatch Servicing</option>
+                    <option value="Bluetooth Device">Bluetooth Audio Device Issue</option>
+                    <option value="Accessory Claim">Back Case / Accessory Claim</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Device / Product Model</label>
+                  <input type="text" id="complaintDeviceModel" placeholder="e.g. iPhone 15 Pro / Galaxy Watch 6 / JBL Flip 6" required>
+                </div>
+                <div class="form-group">
+                  <label>Complaint Details & Issue</label>
+                  <textarea id="complaintDescription" rows="3" placeholder="Describe the fault or issue clearly..." required></textarea>
+                </div>
+                <button type="submit" style="background-color: var(--accent-warning); color: #0b0f19;">Submit Complaint Ticket</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- CUSTOMER CHAT CARD WITH REAL TIME TIMESTAMPS -->
+          <div class="card">
+            <h2>Live Chat Support with Admin</h2>
+            <div class="chat-box" id="custChatBox"></div>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="custChatInput" placeholder="Type a message to admin..." style="flex:1; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: var(--radius-sm);" onkeydown="if(event.key==='Enter') sendChatMessage('customer')">
+              <button style="width: auto; padding: 0 20px;" onclick="sendChatMessage('customer')">Send</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Your Registered Service Complaints</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Category</th>
+                  <th>Device / Model</th>
+                  <th>Issue Details</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="custComplaintsTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- ACCESSORIES & PRODUCTS CATALOG -->
+          <div class="card">
+            <h2>Accessories, Back Cases, Smartwatches & Bluetooth Store</h2>
+            <div id="catalogGrid" class="catalog-grid"></div>
+          </div>
+        </div>
+
+        <!-- CUSTOMER PRODUCT DETAILS VIEW -->
+        <div id="customerDetailsView" class="page-view">
+          <button class="btn btn-secondary" onclick="showCustomerHome()">← Back to Store Catalog</button>
+          <div class="card">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+              <div style="height: 300px; border-radius: var(--radius-md); overflow: hidden;">
+                <img id="custDetailImg" src="" alt="Product" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div>
+                <h2 id="custDetailTitle" style="border: none; margin-bottom: 5px;">Product Title</h2>
+                <div id="custDetailPrice" style="font-size: 1.5rem; color: var(--accent-success); font-weight: bold; margin-bottom: 10px;">₹0</div>
+                <div id="custDetailStock" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">In Stock</div>
+                <p id="custDetailDesc" style="color: var(--text-muted); margin-bottom: 20px;">Description text.</p>
+                <div style="display: flex; gap: 12px;">
+                  <button id="custAddToCartBtn" onclick="addToCartFromDetails()" style="background: var(--accent-warning); color: #0b0f19;">🛒 Add to Cart</button>
+                  <button id="custOrderBtn" onclick="placeOrderDirect()">Buy Now / Store Pickup</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CUSTOMER SHOPPING CART VIEW & ORDERED BILL -->
+        <div id="customerCartView" class="page-view">
+          <button class="btn btn-secondary" onclick="showCustomerHome()">← Back to Store Catalog</button>
+
+          <div class="card">
+            <h2>Your Cart & Ordered Products</h2>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Product Title</th>
+                  <th>Unit Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="cartTableBody"></tbody>
+            </table>
+
+            <div style="margin-top: 20px; text-align: right; font-size: 1.1rem; font-weight: bold;">
+              Subtotal: <span id="cartSubtotal" style="color: var(--accent-success);">₹0</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+              <button style="width: auto; background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color);" onclick="clearCart()">Clear Cart</button>
+              <button style="width: auto; background: var(--accent-success); color: #0b0f19;" onclick="generateCartBill()">Checkout & Generate Ordered Bill</button>
+            </div>
+
+            <!-- ORDERED BILL RECEIPT OUTPUT WITH SHOP ADDRESS -->
+            <div id="printableCartBill" class="bill-receipt" style="display: none;">
+              <div class="bill-header">
+                <div>
+                  <h3 style="margin-bottom: 4px; color: #0b0f19;">⚡ Jerish Mobile Sales & Service</h3>
+                  <div style="font-size: 0.85rem; color: #334155; font-weight: 500;">
+                    📍 <strong>Shop Address:</strong> No. 84, South Bazaar, Palayamkottai, Tirunelveli, Tamil Nadu - 627002<br>
+                    📞 <strong>Contact / WhatsApp:</strong> +91 79043 56768 | ✉️ support@jerishmobiles.com
+                  </div>
+                </div>
+                <div style="text-align: right; font-size: 0.85rem;">
+                  <div><strong>Invoice No:</strong> <span id="billInvoiceNum">INV-8821</span></div>
+                  <div><strong>Date:</strong> <span id="billDate"></span></div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 12px; font-size: 0.85rem;">
+                <strong>Customer:</strong> <span id="billCustomerName"></span> | <strong>Phone:</strong> <span id="billCustomerPhone"></span>
+              </div>
+
+              <div id="billItemsContainer"></div>
+
+              <div style="border-top: 1px dashed #334155; margin-top: 10px; padding-top: 8px;">
+                <div class="bill-row"><span>Subtotal:</span><span id="billSubtotal">₹0</span></div>
+                <div class="bill-row"><span>GST Tax (18%):</span><span id="billTax">₹0</span></div>
+                <div class="bill-total"><span>Grand Total Bill:</span><span id="billGrandTotal">₹0</span></div>
+              </div>
+
+              <!-- FOOTER SHOP ADDRESS & STAMP AREA -->
+              <div style="border-top: 1px solid #e2e8f0; margin-top: 20px; padding-top: 12px; font-size: 0.8rem; color: #475569; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                  <strong>Jerish Mobile Sales & Service</strong><br>
+                  Authorized Retail & Repair Center<br>
+                  Open Mon–Sat: 9:00 AM – 9:00 PM
+                </div>
+                <div style="text-align: right;">
+                  <br>
+                  Jerish<br>
+                  <strong>Authorized Signatory</strong>
+                </div>
+              </div>
+
+              <p style="font-size: 0.75rem; color: #64748b; margin-top: 15px; text-align: center;">
+                Thank you for shopping with Jerish Mobile! Please retain this bill for store pickup & warranty verification.
+              </p>
+
+              <button class="btn btn-sm" onclick="window.print()" style="margin-top: 15px; background: #0284c7; color: #fff;">🖨️ Print Purchase Bill</button>
+            </div>
+
+            <!-- ALWAYS VISIBLE STORE ADDRESS FOOTER AT BOTTOM OF CART -->
+            <div style="margin-top: 30px; padding: 16px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.88rem; color: var(--text-muted);">
+              <h4 style="color: var(--accent-primary); margin-bottom: 6px;">📍 Store Pickup & Service Location</h4>
+              <p style="margin-bottom: 4px;"><strong>Jerish Mobile Sales & Service</strong></p>
+              <p>No. 84, South Bazaar, Palayamkottai, Tirunelveli, Tamil Nadu - 627002</p>
+              <p>Phone: +91 79043 56768 | Email: support@jerishmobiles.com</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PORTAL 2: ADMIN / SERVICE PORTAL -->
+    <div id="adminPortal" class="page-view">
+
+      <!-- Admin Auth View -->
+      <div id="adminAuthView" class="page-view active">
+        <div class="card auth-card">
+          <h2>Admin / Technician Login</h2>
+          <form onsubmit="handleAdminLogin(event)">
+            <div class="form-group">
+              <label>Admin Username</label>
+              <input type="text" id="adminUsername" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="adminPassword" placeholder="Password" required>
+            </div>
+            <button type="submit">Sign In to Dashboard</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard -->
+      <div id="adminDashboardView" class="page-view">
+        <div class="user-header">
+          <div>
+            <span>Role: <strong style="color: var(--accent-primary);">Authorized Administrator</strong></span>
+          </div>
+          <button class="btn-sm btn-danger" onclick="logoutAdmin()">Admin Logout</button>
+        </div>
+
+        <div id="adminHomeView" class="page-view active">
+          
+          <!-- ADMIN MULTI-CUSTOMER SUPPORT CHAT CONSOLE -->
+          <div class="card">
+            <h2>Live Customer Support Console</h2>
+            
+            <div style="display: grid; grid-template-columns: 220px 1fr; gap: 15px; margin-top: 10px;">
+              <!-- Left Sidebar: Active Customer List -->
+              <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px;">
+                <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-primary); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                  Active Customer Chats
+                </div>
+                <div id="adminCustomerChatList" style="max-height: 240px; overflow-y: auto;"></div>
+              </div>
+
+              <!-- Right Side: Active Customer Chat Window with Timestamps -->
+              <div>
+                <div class="chat-box" id="adminChatBox"></div>
+                <div style="display: flex; gap: 10px;">
+                  <input type="text" id="adminChatInput" placeholder="Reply to selected customer..." style="flex:1; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: var(--radius-sm);" onkeydown="if(event.key==='Enter') sendChatMessage('admin')">
+                  <button style="width: auto; padding: 0 20px;" onclick="sendChatMessage('admin')">Send Reply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="container container-two-col">
+            <div class="card">
+              <h2>Create Repair Job Card</h2>
+              <form onsubmit="createNewJob(event)">
+                <div class="form-group">
+                  <label>Customer Name & Contact</label>
+                  <input type="text" id="adminCustName" placeholder="Customer Name (+Phone)" required>
+                </div>
+                <div class="form-group">
+                  <label>Device Brand & Model</label>
+                  <input type="text" id="adminDeviceName" placeholder="e.g. Samsung S24 Ultra / Apple Watch Ultra 2 / JBL Flip 6" required>
+                </div>
+                <div class="form-group">
+                  <label>Reported Issue / Fault Description</label>
+                  <input type="text" id="adminDeviceIssue" placeholder="e.g. Screen replacement, Battery fault, Charging port" required>
+                </div>
+                <div class="form-group">
+                  <label>Estimated Cost (₹)</label>
+                  <input type="number" id="adminCost" placeholder="3500" required>
+                </div>
+                <button type="submit">Register Job Card</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>Service Center Metrics & History</h2>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; text-align: center; margin-bottom: 20px;">
+                <div style="background: var(--bg-main); padding: 15px; border-radius: var(--radius-md);">
+                  <div id="metricTotalJobs" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-primary);">0</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Total Repairs Handled</div>
+                </div>
+
+                <div style="background: var(--bg-main); padding: 15px; border-radius: var(--radius-md);">
+                  <div id="metricActive" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-warning);">0</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Active Repairs</div>
+                </div>
+
+                <div style="background: var(--bg-main); padding: 15px; border-radius: var(--radius-md);">
+                  <div id="metricCompleted" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-success);">0</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Completed Repairs</div>
+                </div>
+
+                <div style="background: var(--bg-main); padding: 15px; border-radius: var(--radius-md);">
+                  <div id="metricComplaints" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-danger);">0</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Pending Complaints</div>
+                </div>
+
+                <div style="background: var(--bg-main); padding: 15px; border-radius: var(--radius-md);">
+                  <div id="metricRevenue" style="font-size: 1.8rem; font-weight: bold; color: #a855f7;">₹0</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Total Service Revenue</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Active Repair Queue & Job Cards</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Customer</th>
+                  <th>Device Model</th>
+                  <th>Issue</th>
+                  <th>Status</th>
+                  <th>Cost</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminJobTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h2>Customer Complaint Tickets Queue</h2>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Customer</th>
+                  <th>Category</th>
+                  <th>Device Model</th>
+                  <th>Reported Complaint</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminComplaintTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminJobDetailsView" class="page-view">
+          <button class="btn btn-secondary" onclick="showAdminHome()">← Back to Queue</button>
+          
+          <div class="card">
+            <h2>Manage & Generate Official Job Card</h2>
+            <div style="margin-bottom: 20px; color: var(--text-muted);">
+              <p><strong>Job Card Number:</strong> <span id="adminDetailJobId" style="color: var(--accent-primary);">JOB-000</span></p>
+              <p><strong>Customer Details:</strong> <span id="adminDetailCust"></span></p>
+              <p><strong>Device / Item Model:</strong> <span id="adminDetailDevice"></span></p>
+              <p><strong>Reported Issue:</strong> <span id="adminDetailIssue"></span></p>
+              <p><strong>Estimated Repair Cost:</strong> <span id="adminDetailCost"></span></p>
+            </div>
+
+            <div class="form-group">
+              <label>Update Repair Status</label>
+              <select id="adminStatusSelect">
+                <option value="In Progress">In Progress</option>
+                <option value="Awaiting Parts">Awaiting Parts</option>
+                <option value="Completed">Completed & Ready for Pickup</option>
+              </select>
+            </div>
+            
+            <div style="display: flex; gap: 15px;">
+              <button onclick="updateJobStatus()" style="flex: 1;">Save Status Changes</button>
+              <button onclick="printJobCard()" style="flex: 1; background-color: var(--accent-success); color: #0b0f19;">🖨️ Generate & Print Official Job Card Document</button>
+            </div>
+
+            <div id="jobCardOutput" class="job-card-printable" style="display: none;">
+              <h3>Jerish Mobile Service Center - Official Service Job Card</h3>
+              <div class="printable-grid">
+                <div><strong>Job Card ID:</strong> <span id="pJobId"></span></div>
+                <div><strong>Date Registered:</strong> <span id="pDate"></span></div>
+                <div><strong>Customer Info:</strong> <span id="pCust"></span></div>
+                <div><strong>Device Model:</strong> <span id="pDevice"></span></div>
+                <div><strong>Reported Problem:</strong> <span id="pIssue"></span></div>
+                <div><strong>Repair Status:</strong> <span id="pStatus"></span></div>
+                <div><strong>Estimated Service Cost:</strong> <span id="pCost"></span></div>
+                <div><strong>Authorized Tech Signature:</strong> Jerish Mobile Team</div>
+              </div>
+              <p style="font-size: 0.8rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                Note: Present this job card document during device collection at the Jerish Mobile service center counter.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Banner -->
+  <div id="toastNotification" style="
+    display: none;
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background-color: #10b981;
+    color: #ffffff;
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-weight: 600;
+    font-size: 0.95rem;
+    z-index: 9999;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.3s ease-in-out;
+  ">
+    <span>✓</span> Product is added, check in my cart.
+  </div>
+  
+  <!-- Frontend Integration Script -->
+  <script>
+    let registeredCustomers = JSON.parse(localStorage.getItem('techfix_customers')) || [];
+    let selectedProduct = null;
+    let selectedJobId = null;
+
+    // Helper to retrieve user-isolated storage key
+    function getCurrentCartKey() {
+      const activeUser = JSON.parse(localStorage.getItem('techfix_active_user') || '{}');
+      const userPhone = activeUser.phone || localStorage.getItem('activeUserPhone');
+      return userPhone ? `techfix_cart_${userPhone}` : 'techfix_cart_guest';
+    }
+
+    function loadCustomerCart() {
+      const key = getCurrentCartKey();
+      window.customerCart = JSON.parse(localStorage.getItem(key)) || [];
+      updateCartBadge();
+    }
+
+    function saveCustomerCart() {
+      const key = getCurrentCartKey();
+      localStorage.setItem(key, JSON.stringify(window.customerCart));
+      updateCartBadge();
+    }
+
+    // Initialize cart for the active user session
+    loadCustomerCart();
+
+    // Load initial fallback state from localStorage for multi-tab sync
+    window.chatMessages = JSON.parse(localStorage.getItem('techfix_chat_messages')) || [];
+    window.repairJobs = JSON.parse(localStorage.getItem('techfix_repair_jobs')) || [];
+    window.customerComplaints = JSON.parse(localStorage.getItem('techfix_customer_complaints')) || [];
+
+    // Backend Integration Helper: Fetch secure invoice endpoint
+    async function fetchUserInvoice() {
+      try {
+        const response = await fetch('/api/invoice');
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.warn('User is unauthorized.');
+            return;
+          }
+          throw new Error('Failed to fetch invoice');
+        }
+
+        const invoiceData = await response.json();
+        console.log('User Invoice Data:', invoiceData);
+        return invoiceData;
+      } catch (err) {
+        console.error('Error fetching invoice:', err);
+      }
+    }
+
+    // Sync across browser tabs
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'techfix_chat_messages') {
+        window.chatMessages = JSON.parse(event.newValue) || [];
+        renderChatMessages();
+      } else if (event.key === 'techfix_repair_jobs') {
+        window.repairJobs = JSON.parse(event.newValue) || [];
+        renderAdminQueue();
+      } else if (event.key === 'techfix_customer_complaints') {
+        window.customerComplaints = JSON.parse(event.newValue) || [];
+        renderAdminQueue();
+        renderCustomerComplaints();
+      } else if (event.key === getCurrentCartKey()) {
+        window.customerCart = JSON.parse(event.newValue) || [];
+        updateCartBadge();
+      }
+    });
+
+    // Format Timestamp Helper Function
+    function formatDateTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    // Multi-Customer Chat Routing Logic
+    let selectedChatCustomer = null;
+
+    function sendChatMessage(sender) {
+      const inputId = sender === 'customer' ? 'custChatInput' : 'adminChatInput';
+      const input = document.getElementById(inputId);
+      const msgText = input.value.trim();
+
+      if (!msgText) return;
+
+      const custName = document.getElementById('customerNameDisplay')?.innerText || 'Customer';
+      const targetCustomer = sender === 'customer' ? custName : selectedChatCustomer;
+
+      if (sender === 'admin' && !selectedChatCustomer) {
+        alert('Please select a customer thread from the left sidebar first.');
+        return;
+      }
+
+      const msgObj = {
+        sender: sender,
+        customerName: targetCustomer,
+        text: msgText,
+        timestamp: Date.now()
+      };
+
+      if (window.firebasePushMessage) {
+        window.firebasePushMessage(msgObj);
+      } else {
+        window.chatMessages.push(msgObj);
+        localStorage.setItem('techfix_chat_messages', JSON.stringify(window.chatMessages));
+        renderChatMessages();
+      }
+      input.value = '';
+    }
+
+    function selectCustomerChat(custName) {
+      selectedChatCustomer = custName;
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      const custBox = document.getElementById('custChatBox');
+      const adminBox = document.getElementById('adminChatBox');
+      const custListContainer = document.getElementById('adminCustomerChatList');
+
+      const currentCustName = document.getElementById('customerNameDisplay')?.innerText || 'Customer';
+
+      // 1. Render Customer Chat Box with Timestamps
+      if (custBox) {
+        custBox.innerHTML = '';
+        const myMessages = window.chatMessages.filter(m => m.customerName === currentCustName || !m.customerName);
+        
+        myMessages.forEach(msg => {
+          const div = document.createElement('div');
+          div.className = `chat-msg ${msg.sender}`;
+          const displayName = msg.sender === 'customer' ? (msg.customerName || 'You') : 'Admin';
+          const timeStr = formatDateTime(msg.timestamp);
+
+          div.innerHTML = `
+            <div><strong>${displayName}:</strong> ${msg.text}</div>
+            <div class="chat-time">${timeStr}</div>
+          `;
+          custBox.appendChild(div);
+        });
+        custBox.scrollTop = custBox.scrollHeight;
+      }
+
+      // 2. Render Admin Customer Thread Sidebar & Chat Box with Timestamps
+      if (adminBox) {
+        const uniqueCustomers = [...new Set(window.chatMessages.map(m => m.customerName).filter(Boolean))];
+
+        if (custListContainer) {
+          custListContainer.innerHTML = '';
+          if (uniqueCustomers.length === 0) {
+            custListContainer.innerHTML = '<div style="padding:8px; color:var(--text-muted); font-size:0.8rem;">No active customer chats</div>';
+          } else {
+            uniqueCustomers.forEach(cust => {
+              const btn = document.createElement('div');
+              const isSelected = selectedChatCustomer === cust;
+              btn.style.cssText = `padding: 8px 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); font-weight: 500; font-size: 0.85rem; background: ${isSelected ? 'var(--accent-primary)' : 'transparent'}; color: ${isSelected ? '#0b0f19' : 'var(--text-main)'}; border-radius: var(--radius-sm); margin-bottom: 4px; word-break: break-word;`;
+              btn.innerText = cust;
+              btn.onclick = () => selectCustomerChat(cust);
+              custListContainer.appendChild(btn);
+            });
+          }
+        }
+
+        // Auto-select first customer if none selected
+        if (!selectedChatCustomer && uniqueCustomers.length > 0) {
+          selectedChatCustomer = uniqueCustomers[0];
+        }
+
+        adminBox.innerHTML = '';
+        if (selectedChatCustomer) {
+          const activeThread = window.chatMessages.filter(m => m.customerName === selectedChatCustomer);
+          activeThread.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `chat-msg ${msg.sender}`;
+            const label = msg.sender === 'customer' ? msg.customerName : 'Admin';
+            const timeStr = formatDateTime(msg.timestamp);
+
+            div.innerHTML = `
+              <div><strong>${label}:</strong> ${msg.text}</div>
+              <div class="chat-time">${timeStr}</div>
+            `;
+            adminBox.appendChild(div);
+          });
+        } else {
+          adminBox.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding-top: 20px;">Select a customer thread to view messages</div>';
+        }
+        adminBox.scrollTop = adminBox.scrollHeight;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeUser = JSON.parse(localStorage.getItem('techfix_active_user'));
+      if (activeUser) {
+        autoLoginCustomer(activeUser);
+      }
+      renderChatMessages();
+    });
+
+    const catalogProducts = [
+      { id: 'P-01', title: 'Apple iPhone 15 Pro Max Clear MagSafe Cover', category: 'Phone Back Cover', compat: 'Apple iPhone 15 Pro Max', price: '₹799', imgSrc: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=600&q=80', desc: 'Shockproof clear magnetic back case cover.', stock: 25 },
+      { id: 'P-02', title: 'Samsung Galaxy S24 Ultra Armor Cover', category: 'Phone Back Cover', compat: 'Samsung Galaxy S24 Ultra', price: '₹699', imgSrc: 'https://images.unsplash.com/photo-1541877944-ac82a091518a?auto=format&fit=crop&w=600&q=80', desc: 'Heavy-duty military-grade rugged back cover.', stock: 30 },
+      {
+        id: 'P-03',
+        title: 'Google Pixel 8 Pro Matte TPU Back Case Cover',
+        category: 'Phone Back Cover',
+        compat: 'Google Pixel 8 Pro',
+        price: '₹499',
+        imgSrc: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=80',
+        desc: 'Ultra-thin liquid silicone soft back cover providing precision grip and scratch resistant velvet lining.',
+        stock: 18
+      },
+      { id: 'P-04', title: 'JBL Flip 6 Waterproof Portable Speaker', category: 'Bluetooth Speaker', compat: 'Universal Bluetooth 5.1', price: '₹9,999', imgSrc: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80', desc: 'High-fidelity JBL sound, IP67 waterproof.', stock: 12 },
+      {
+        id: 'P-05',
+        title: 'Boat SoundLink Flex Bluetooth Portable Speaker',
+        category: 'Bluetooth Speaker',
+        compat: 'Boat Audio / Universal Bluetooth',
+        price: '₹15,900',
+        imgSrc: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80',
+        desc: 'State-of-the-art Boat PositionIQ technology automatically optimizes audio orientation, rugged steel grille design.',
+        stock: 8
+      },
+      {
+        id: 'P-06',
+        title: 'Sony SRS-XB100 Compact Wireless Bluetooth Speaker',
+        category: 'Bluetooth Speaker',
+        compat: 'Sony Audio / Universal Bluetooth',
+        price: '₹4,990',
+        imgSrc: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80',
+        desc: 'Extra Bass technology, Sound Diffusion Processor, up to 16 hours battery life, hands-free calling mic.',
+        stock: 15
+      },
+      { id: 'P-07', title: 'Apple Watch Series 9 GPS Smartwatch', category: 'Smartwatch', compat: 'Apple iOS', price: '₹41,900', imgSrc: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80', desc: 'S9 SiP chip, Double Tap gesture control.', stock: 10 },
+      {
+        id: 'P-08',
+        title: 'Samsung Galaxy Watch 6 Bluetooth Smartwatch',
+        category: 'Smartwatch',
+        compat: 'Samsung & Android OS',
+        price: '₹28,999',
+        imgSrc: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=600&q=80',
+        desc: 'Customized sleep coaching, BIA body composition sensor, sapphire crystal glass display, interchangeable band system.',
+        stock: 14
+      },
+      {
+        id: 'P-09',
+        title: 'Noise colorfit pro 6 Fitness & Health Tracker Smartwatch',
+        category: 'Smartwatch',
+        compat: 'Universal iOS & Android',
+        price: '₹4,999',
+        imgSrc: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=600&q=80',
+        desc: 'Bright AMOLED display, built-in mic and speaker, wheel-chair mode, up to 14 days extended battery life.',
+        stock: 6
+      },
+      {
+        id: 'P-10',
+        title: 'Apple Watch Series 9 Armor Bumper Back Case Cover',
+        category: 'Smartwatch Case Cover',
+        compat: 'Apple Watch Series 9 (45mm)',
+        price: '₹349',
+        imgSrc: 'https://images.unsplash.com/photo-1510017803434-a899398421b3?auto=format&fit=crop&w=600&q=80',
+        desc: 'All-around full body TPU bumper cover with integrated tempered glass screen protector.',
+        stock: 40
+      },
+      {
+        id: 'P-11',
+        title: 'Samsung Galaxy Watch 6 Silicone Protective Case Cover',
+        category: 'Smartwatch Case Cover',
+        compat: 'Samsung Galaxy Watch 6',
+        price: '₹299',
+        imgSrc: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=600&q=80',
+        desc: 'Flexible shock-absorption TPU shell back case cover guarding watch edges from impact.',
+        stock: 35
+      },
+      {
+        id: 'P-12',
+        title: 'JBL Flip 6 Hard Travel Case Back Cover Bag',
+        category: 'Bluetooth Speaker Case',
+        compat: 'JBL Flip 6 / Flip 5',
+        price: '₹599',
+        imgSrc: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=600&q=80',
+        desc: 'Water-resistant EVA hard travel case cover with soft interior padding and shoulder strap.',
+        stock: 20
+      }
+    ];
+
+    function switchPortal(portal) {
+      document.getElementById('btnCustomerRole').classList.toggle('active', portal === 'customer');
+      document.getElementById('btnAdminRole').classList.toggle('active', portal === 'admin');
+
+      document.getElementById('customerPortal').classList.toggle('active', portal === 'customer');
+      document.getElementById('adminPortal').classList.toggle('active', portal === 'admin');
+
+      if (portal === 'admin') {
+        renderAdminQueue();
+        renderChatMessages();
+      }
+    }
+
+    function toggleCustomerAuth(view) {
+      document.getElementById('customerLoginForm').classList.toggle('page-view', view !== 'login');
+      document.getElementById('customerRegisterForm').classList.toggle('page-view', view !== 'register');
+    }
+
+    // Customer accounts are synced through Firebase so the same account can be
+    // used on PC, phone and other devices. localStorage is kept only as an
+    // offline fallback/cache.
+    async function handleCustomerRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('custRegName').value.trim();
+      const phone = document.getElementById('custRegPhone').value.trim();
+      const pass = document.getElementById('custRegPass').value;
+
+      if (window.firebaseRegisterCustomer) {
+        try {
+          const result = await window.firebaseRegisterCustomer({ name, phone, pass });
+          if (!result.ok) {
+            alert(result.message || 'Phone number already registered. Please login.');
+            return;
+          }
+
+          const customer = { name, phone };
+          registeredCustomers = registeredCustomers.filter(c => c.phone !== phone);
+          registeredCustomers.push(customer);
+          localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
+
+          alert('Registration successful!');
+          document.getElementById('custRegName').value = '';
+          document.getElementById('custRegPhone').value = '';
+          document.getElementById('custRegPass').value = '';
+          toggleCustomerAuth('login');
+          return;
+        } catch (err) {
+          console.error('Firebase registration failed:', err);
+          alert('Unable to connect to the online account system. Please try again.');
+          return;
+        }
+      }
+
+      // Offline/local fallback.
+      if (registeredCustomers.some(c => c.phone === phone && c.pass === pass)) {
+        alert('Phone number already registered. Please login.');
+        return;
+      }
+      const newCustomer = { name, phone, pass };
+      registeredCustomers.push(newCustomer);
+      localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
+      alert('Registration successful!');
+      toggleCustomerAuth('login');
+    }
+
+    async function handleCustomerLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('custLoginPhone').value.trim();
+      const pass = document.getElementById('custLoginPass').value;
+
+      if (window.firebaseLoginCustomer) {
+        try {
+          const result = await window.firebaseLoginCustomer(phone, pass);
+          if (result.ok && result.customer) {
+            const customer = result.customer;
+            localStorage.setItem('techfix_active_user', JSON.stringify(customer));
+            // Keep a local cache for offline fallback.
+            registeredCustomers = registeredCustomers.filter(c => c.phone !== customer.phone);
+            registeredCustomers.push(customer);
+            localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
+            autoLoginCustomer(customer);
+          } else {
+            alert(result.message || 'Incorrect phone or password');
+          }
+          return;
+        } catch (err) {
+          console.error('Firebase login failed:', err);
+          // Try the local cache if the device is temporarily offline.
+        }
+      }
+
+      const customer = registeredCustomers.find(c => c.phone === phone && c.pass === pass);
+      if (customer) {
+        localStorage.setItem('techfix_active_user', JSON.stringify(customer));
+        autoLoginCustomer(customer);
+      } else {
+        alert('Incorrect phone or password');
+      }
+    }
+
+    function autoLoginCustomer(customer) {
+      document.getElementById('customerNameDisplay').innerText = customer.name;
+      document.getElementById('customerPhoneDisplay').innerText = customer.phone;
+
+      document.getElementById('customerAuthView').classList.remove('active');
+      document.getElementById('customerDashboardView').classList.add('active');
+
+      resetCartBillDisplay(); // never carry over a previous customer's generated bill
+      loadCustomerCart();
+      renderCatalog();
+      renderCustomerComplaints();
+      renderChatMessages();
+    }
+
+    function logoutCustomer() {
+      localStorage.removeItem('techfix_active_user');
+      window.customerCart = [];
+      updateCartBadge();
+      resetCartBillDisplay(); // clear any generated bill so it can't be seen by the next login
+
+      document.getElementById('customerDashboardView').classList.remove('active');
+      document.getElementById('customerAuthView').classList.add('active');
+    }
+
+    function registerComplaint(e) {
+      e.preventDefault();
+      const cat = document.getElementById('complaintCategory').value;
+      const dev = document.getElementById('complaintDeviceModel').value;
+      const desc = document.getElementById('complaintDescription').value;
+      const custName = document.getElementById('customerNameDisplay').innerText || 'Customer';
+
+      const tktId = 'TKT-' + Math.floor(100 + Math.random() * 900);
+      const newComplaint = { id: tktId, customer: custName, category: cat, deviceModel: dev, description: desc, status: 'Pending' };
+
+      if (window.firebasePushComplaint) {
+        window.firebasePushComplaint(newComplaint);
+      } else {
+        window.customerComplaints.push(newComplaint);
+        localStorage.setItem('techfix_customer_complaints', JSON.stringify(window.customerComplaints));
+        renderCustomerComplaints();
+        renderAdminQueue();
+      }
+
+      alert(`Complaint registered! Ticket ID: ${tktId}`);
+      document.getElementById('complaintCategory').value = '';
+      document.getElementById('complaintDeviceModel').value = '';
+      document.getElementById('complaintDescription').value = '';
+    }
+
+    function complaintStatusBadgeClass(status) {
+      if (status === 'Completed') return 'badge-success';
+      if (status === 'In Progress') return 'badge-info';
+      return 'badge-warning'; // Pending / anything else
+    }
+
+    function renderCustomerComplaints() {
+      const tbody = document.getElementById('custComplaintsTableBody');
+      const custName = document.getElementById('customerNameDisplay').innerText || 'Customer';
+
+      const userComplaints = window.customerComplaints.filter(c => c.customer === custName || c.customer === 'User');
+
+      if (userComplaints.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No complaints registered yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = userComplaints.map(c => `
+        <tr>
+          <td><strong style="color: var(--accent-primary);">${c.id}</strong></td>
+          <td>${c.category}</td>
+          <td>${c.deviceModel}</td>
+          <td>${c.description}</td>
+          <td><span class="badge ${complaintStatusBadgeClass(c.status)}">${c.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('adminUsername').value;
+      const pass = document.getElementById('adminPassword').value;
+
+      if (user === 'admin' && pass === 'admin123') {
+        document.getElementById('adminAuthView').classList.remove('active');
+        document.getElementById('adminDashboardView').classList.add('active');
+        renderAdminQueue();
+        renderChatMessages();
+      } else {
+        alert('Incorrect password');
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById('adminDashboardView').classList.remove('active');
+      document.getElementById('adminAuthView').classList.add('active');
+    }
+
+    function renderCatalog() {
+      const container = document.getElementById('catalogGrid');
+      container.innerHTML = catalogProducts.map(p => `
+        <div class="catalog-item">
+          <div onclick="openProductDetails('${p.id}')">
+            <div class="item-image"><img src="${p.imgSrc}" alt="${p.title}"></div>
+            <h4 style="font-size: 0.95rem; margin-bottom: 4px;">${p.title}</h4>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">${p.compat}</div>
+            <div style="color: var(--accent-success); font-weight: 700; margin-top: 5px;">${p.price}</div>
+            <span class="view-more-tag">View Details →</span>
+          </div>
+          <button style="margin-top: 10px; background: var(--accent-warning); color: #0b0f19; font-size: 0.82rem; padding: 6px 10px;" onclick="addToCartDirect(event, '${p.id}')">
+            🛒 Add to Cart
+          </button>
+        </div>
+      `).join('');
+    }
+
+    /* CART & ORDER BILL LOGIC */
+    function addToCartDirect(event, id) {
+      event.stopPropagation();
+      const p = catalogProducts.find(item => item.id === id);
+      if (!p) return;
+      addToCart(p);
+    }
+
+    function addToCartFromDetails() {
+      if (selectedProduct) {
+        addToCart(selectedProduct);
+      }
+    }
+
+    function addToCart(product) {
+      const cartKey = getCurrentCartKey();
+      let currentCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+
+      // Parse numeric price directly from string (e.g. "₹799" -> 799)
+      const numericPrice = typeof product.price === 'string' 
+        ? parseInt(product.price.replace(/[^0-9]/g, ''), 10) || 0 
+        : product.price;
+
+      const existing = currentCart.find(item => item.id === product.id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        currentCart.push({
+          id: product.id,
+          title: product.title,
+          price: numericPrice,
+          qty: 1
+        });
+      }
+
+      localStorage.setItem(cartKey, JSON.stringify(currentCart));
+      window.customerCart = currentCart;
+      
+      updateCartBadge();
+      showNotification("Product is added, check in my cart.");
+    }
+
+    function showNotification(message) {
+      const toast = document.getElementById("toastNotification");
+      if (!toast) return;
+
+      toast.innerHTML = `<span>✓</span> ${message}`;
+      toast.style.display = "flex";
+      toast.style.opacity = "1";
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, 300);
+      }, 3000);
+    }
+
+    function updateCartBadge() {
+      const totalCount = window.customerCart.reduce((sum, item) => sum + item.qty, 0);
+      const badge = document.getElementById('cartItemCount');
+      if (badge) badge.innerText = totalCount;
+    }
+
+    // Hides and wipes any previously generated bill so a leftover invoice from
+    // an earlier customer/session can never be seen by someone else.
+    function resetCartBillDisplay() {
+      const billContainer = document.getElementById('printableCartBill');
+      if (billContainer) billContainer.style.display = 'none';
+
+      const itemsContainer = document.getElementById('billItemsContainer');
+      if (itemsContainer) itemsContainer.innerHTML = '';
+
+      const setElemText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+      };
+      setElemText('billInvoiceNum', 'INV-8821');
+      setElemText('billDate', '');
+      setElemText('billCustomerName', '');
+      setElemText('billCustomerPhone', '');
+      setElemText('billSubtotal', '₹0');
+      setElemText('billTax', '₹0');
+      setElemText('billGrandTotal', '₹0');
+    }
+
+    function showCustomerCartView() {
+      document.getElementById('customerHomeView').classList.remove('active');
+      document.getElementById('customerDetailsView').classList.remove('active');
+      document.getElementById('customerCartView').classList.add('active');
+
+      // Every time the cart page is opened fresh, clear out any bill that was
+      // generated earlier in this browser session (possibly by a different
+      // customer) before rendering the current user's own cart.
+      resetCartBillDisplay();
+      renderCartTable();
+    }
+
+    function renderCartTable() {
+      const cartKey = getCurrentCartKey();
+      window.customerCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+
+      const tbody = document.getElementById("cartTableBody");
+      if (!tbody) return;
+
+      if (window.customerCart.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Your cart is empty. Browse catalog to add products!</td></tr>`;
+        document.getElementById("cartSubtotal").innerText = "₹0";
+        return;
+      }
+
+      let subtotal = 0;
+      tbody.innerHTML = window.customerCart.map((item, index) => {
+        const itemTotal = item.price * item.qty;
+        subtotal += itemTotal;
+        return `
+          <tr>
+            <td>${item.title}</td>
+            <td>₹${item.price.toLocaleString('en-IN')}</td>
+            <td>
+              <button class="btn-sm" style="width: auto; padding: 2px 8px;" onclick="changeCartQty(${index}, -1)">-</button>
+              <span style="margin: 0 8px;">${item.qty}</span>
+              <button class="btn-sm" style="width: auto; padding: 2px 8px;" onclick="changeCartQty(${index}, 1)">+</button>
+            </td>
+            <td>₹${itemTotal.toLocaleString('en-IN')}</td>
+            <td><button onclick="removeCartItem(${index})" class="btn-sm btn-danger">Remove</button></td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("cartSubtotal").innerText = `₹${subtotal.toLocaleString('en-IN')}`;
+    }
+
+    function changeCartQty(index, change) {
+      if (window.customerCart[index]) {
+        window.customerCart[index].qty += change;
+        if (window.customerCart[index].qty <= 0) {
+          window.customerCart.splice(index, 1);
+        }
+        saveCustomerCart();
+        renderCartTable();
+      }
+    }
+
+    function removeCartItem(index) {
+      window.customerCart.splice(index, 1);
+      saveCustomerCart();
+      renderCartTable();
+    }
+
+    function clearCart() {
+      window.customerCart = [];
+      saveCustomerCart();
+      renderCartTable();
+    }
+
+
+// AFTER
+function generateCartBill() {
+  // 1. Get the currently logged-in active customer
+  let activeUser = JSON.parse(localStorage.getItem('techfix_active_user') || '{}');
+
+  // Fallback: If no active user in localStorage, try reading from DOM header elements
+  // (no hardcoded name/phone here anymore — that was causing another customer's
+  // fixed test details to appear on a different customer's bill)
+  if (!activeUser.phone) {
+    const nameFromDom = document.getElementById('customerNameDisplay')?.innerText || '';
+    const phoneFromDom = document.getElementById('customerPhoneDisplay')?.innerText || '';
+    activeUser = { name: nameFromDom, phone: phoneFromDom };
+  }
+
+  // If we still can't identify who's logged in, stop instead of guessing/using
+  // a stale global cart or fake customer details.
+  if (!activeUser.phone) {
+    alert("Could not detect an active customer session. Please log in again and retry.");
+    return;
+  }
+
+  // 2. Fetch cart data using the SAME key the rest of the app uses
+  //    (this used to read from a different key: 'cart_' + phone, which never
+  //    matched anything, so it silently fell back to whatever was left in
+  //    window.customerCart — potentially another customer's leftover cart)
+  loadCustomerCart(); // re-syncs window.customerCart strictly to the active user's own key
+  const currentCart = window.customerCart || [];
+
+  if (!currentCart || currentCart.length === 0) {
+    alert("Your cart is empty! Please add products before requesting checkout bill.");
+    return;
+  }
+
+  // 3. Set Customer details explicitly from active user
+  const name = activeUser.name || 'Customer';
+  const phone = activeUser.phone || 'N/A';
+
+  const billInvoiceNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+  const billDate = new Date().toLocaleDateString('en-IN');
+  
+  let subtotal = 0;
+  const itemsContainer = document.getElementById('billItemsContainer');
+  if (itemsContainer) {
+    itemsContainer.innerHTML = '';
+    currentCart.forEach(item => {
+      const itemQty = Number(item.quantity || item.qty || 1);
+      const itemPrice = Number(item.price || 0);
+      const itemTotal = itemPrice * itemQty;
+      subtotal += itemTotal;
+      
+      const row = document.createElement('div');
+      row.className = 'bill-row';
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.padding = '6px 0';
+      row.style.borderBottom = '1px dashed #ccc';
+      row.innerHTML = `
+        <span>${item.title || item.name || 'Product'} (x${itemQty})</span>
+        <span>₹${itemTotal.toLocaleString('en-IN')}</span>
+      `;
+      itemsContainer.appendChild(row);
+    });
+  }
+
+  const tax = Math.round(subtotal * 0.18);
+  const totalAmount = subtotal + tax;
+
+  // 4. Force update DOM elements for customer bill
+  const setElemText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+  };
+
+  setElemText('billInvoiceNum', billInvoiceNo);
+  setElemText('billDate', billDate);
+  setElemText('billCustomerName', name);
+  setElemText('billCustomerPhone', phone);
+  setElemText('billSubtotal', '₹' + subtotal.toLocaleString('en-IN'));
+  setElemText('billTax', '₹' + tax.toLocaleString('en-IN'));
+  setElemText('billGrandTotal', '₹' + totalAmount.toLocaleString('en-IN'));
+
+  // 5. Unhide the bill container
+  const billContainer = document.getElementById('printableCartBill');
+  if (billContainer) {
+    billContainer.style.display = 'block';
+    billContainer.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    alert("Bill generated for " + name + " (₹" + totalAmount.toLocaleString('en-IN') + "), but element #printableCartBill was not found in HTML.");
+  }
+}
+    function showCustomerHome() {
+      document.getElementById('customerHomeView').classList.add('active');
+      document.getElementById('customerDetailsView').classList.remove('active');
+      document.getElementById('customerCartView').classList.remove('active');
+    }
+
+    function openProductDetails(id) {
+      const p = catalogProducts.find(item => item.id === id);
+      if (!p) return;
+      selectedProduct = p;
+
+      document.getElementById('custDetailTitle').innerText = p.title;
+      document.getElementById('custDetailPrice').innerText = p.price;
+      document.getElementById('custDetailImg').src = p.imgSrc;
+      document.getElementById('custDetailDesc').innerText = p.desc;
+      document.getElementById('custDetailStock').innerText = `Stock Remaining: ${p.stock} units`;
+
+      document.getElementById('customerHomeView').classList.remove('active');
+      document.getElementById('customerCartView').classList.remove('active');
+      document.getElementById('customerDetailsView').classList.add('active');
+    }
+
+    function placeOrderDirect() {
+      if (selectedProduct && selectedProduct.stock > 0) {
+        selectedProduct.stock -= 1;
+        document.getElementById('custDetailStock').innerText = `Stock Remaining: ${selectedProduct.stock} units`;
+        alert(`Order placed successfully for ${selectedProduct.title}!`);
+      } else {
+        alert('Item is currently out of stock.');
+      }
+    }
+
+    function trackCustomerJob() {
+      const input = document.getElementById('custJobSearch').value.trim().toUpperCase();
+      if (!input) return alert('Please enter a Job ID');
+
+      const job = window.repairJobs.find(j => j.id.toUpperCase() === input);
+      const box = document.getElementById('trackResultBox');
+
+      if (job) {
+        box.style.display = 'block';
+        document.getElementById('trackJobNum').innerText = job.id;
+        document.getElementById('trackDevice').innerText = job.device;
+        document.getElementById('trackCustomerName').innerText = job.customer;
+        document.getElementById('trackCost').innerText = job.cost;
+
+        const badge = document.getElementById('trackBadge');
+        badge.innerText = job.status;
+        badge.className = 'badge ' + (job.status === 'Completed' ? 'badge-success' : 'badge-warning');
+      } else {
+        alert('No job card found with ID: ' + input);
+        box.style.display = 'none';
+      }
+    }
+
+    function renderAdminQueue() {
+      const tbody = document.getElementById('adminJobTableBody');
+      if (tbody) {
+        tbody.innerHTML = window.repairJobs.map(j => `
+          <tr>
+            <td><strong style="color: var(--accent-primary);">${j.id}</strong></td>
+            <td>${j.customer}</td>
+            <td>${j.device}</td>
+            <td>${j.issue || 'Hardware Servicing'}</td>
+            <td><span class="badge ${j.status === 'Completed' ? 'badge-success' : 'badge-warning'}">${j.status}</span></td>
+            <td>${j.cost}</td>
+            <td><button class="btn-sm" onclick="openAdminJobDetails('${j.id}')">Manage & Job Card →</button></td>
+          </tr>
+        `).join('');
+      }
+
+      const complaintTbody = document.getElementById('adminComplaintTableBody');
+      if (complaintTbody) {
+        complaintTbody.innerHTML = window.customerComplaints.map(c => `
+          <tr>
+            <td><strong style="color: var(--accent-warning);">${c.id}</strong></td>
+            <td>${c.customer}</td>
+            <td>${c.category}</td>
+            <td>${c.deviceModel}</td>
+            <td>${c.description}</td>
+            <td>
+              <select class="complaint-status-select" style="width:auto; padding: 6px 8px; font-size: 0.82rem;" onchange="updateComplaintStatus('${c.id}', this.value)">
+                <option value="Pending" ${c.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Completed" ${c.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              </select>
+            </td>
+            <td><button class="btn-sm btn-danger" onclick="resolveComplaint('${c.id}')">Close Ticket</button></td>
+          </tr>
+        `).join('');
+      }
+
+      const totalJobsCount = window.repairJobs.length;
+      const activeCount = window.repairJobs.filter(j => j.status !== 'Completed').length;
+      const completedCount = window.repairJobs.filter(j => j.status === 'Completed').length;
+      const totalComplaintsCount = window.customerComplaints.length;
+
+      const totalRevenue = window.repairJobs.reduce((sum, job) => {
+        const costNum = parseInt(job.cost.replace(/[^0-9]/g, '')) || 0;
+        return sum + costNum;
+      }, 0);
+
+      if (document.getElementById('metricTotalJobs')) document.getElementById('metricTotalJobs').innerText = totalJobsCount;
+      if (document.getElementById('metricActive')) document.getElementById('metricActive').innerText = activeCount;
+      if (document.getElementById('metricCompleted')) document.getElementById('metricCompleted').innerText = completedCount;
+      if (document.getElementById('metricComplaints')) document.getElementById('metricComplaints').innerText = totalComplaintsCount;
+      if (document.getElementById('metricRevenue')) document.getElementById('metricRevenue').innerText = '₹' + totalRevenue.toLocaleString('en-IN');
+    }
+
+    function openAdminJobDetails(jobId) {
+      const job = window.repairJobs.find(j => j.id === jobId);
+      if (!job) return;
+      selectedJobId = jobId;
+
+      document.getElementById('adminDetailJobId').innerText = job.id;
+      document.getElementById('adminDetailCust').innerText = job.customer;
+      document.getElementById('adminDetailDevice').innerText = job.device;
+      document.getElementById('adminDetailIssue').innerText = job.issue || 'Hardware Servicing';
+      document.getElementById('adminDetailCost').innerText = job.cost;
+      document.getElementById('adminStatusSelect').value = job.status || 'In Progress';
+
+      document.getElementById('adminHomeView').classList.remove('active');
+      document.getElementById('adminJobDetailsView').classList.add('active');
+    }
+
+    function updateComplaintStatus(tktId, newStatus) {
+      const complaint = window.customerComplaints.find(c => c.id === tktId);
+      if (complaint) {
+        complaint.status = newStatus;
+        if (window.firebaseUpdateComplaint && complaint._fbKey) {
+          // Write the change to the complaint's own Firebase node. The onValue
+          // listener will then re-broadcast this to every open tab/device,
+          // including the one that just made the change.
+          window.firebaseUpdateComplaint(complaint._fbKey, { status: newStatus });
+        } else {
+          localStorage.setItem('techfix_customer_complaints', JSON.stringify(window.customerComplaints));
+          renderAdminQueue();
+          renderCustomerComplaints();
+        }
+      }
+    }
+
+    function resolveComplaint(tktId) {
+      const idx = window.customerComplaints.findIndex(c => c.id === tktId);
+      if (idx !== -1) {
+        const complaint = window.customerComplaints[idx];
+        if (window.firebaseRemoveComplaint && complaint._fbKey) {
+          window.firebaseRemoveComplaint(complaint._fbKey);
+          alert(`Complaint Ticket ${tktId} resolved and closed.`);
+        } else {
+          window.customerComplaints.splice(idx, 1);
+          localStorage.setItem('techfix_customer_complaints', JSON.stringify(window.customerComplaints));
+          alert(`Complaint Ticket ${tktId} resolved and closed.`);
+          renderAdminQueue();
+          renderCustomerComplaints();
+        }
+      }
+    }
+
+   function showAdminHome() {
+    document.getElementById('adminHomeView').classList.add('active');
+    document.getElementById('adminJobDetailsView').classList.remove('active');
+  }
+
+    function createNewJob(e) {
+      e.preventDefault();
+      const name = document.getElementById('adminCustName').value;
+      const device = document.getElementById('adminDeviceName').value;
+      const issue = document.getElementById('adminDeviceIssue').value;
+      const cost = document.getElementById('adminCost').value;
+      const newId = 'JOB-' + Math.floor(100 + Math.random() * 900);
+
+      const newJob = { id: newId, customer: name, device: device, issue: issue, status: 'In Progress', cost: '₹' + cost };
+
+      if (window.firebasePushJob) {
+        window.firebasePushJob(newJob);
+      } else {
+        window.repairJobs.push(newJob);
+        localStorage.setItem('techfix_repair_jobs', JSON.stringify(window.repairJobs));
+        renderAdminQueue();
+      }
+
+      alert(`Job Card ${newId} Created Successfully!`);
+      document.getElementById('adminCustName').value = '';
+      document.getElementById('adminDeviceName').value = '';
+      document.getElementById('adminDeviceIssue').value = '';
+      document.getElementById('adminCost').value = '';
+    }
+
+    function updateJobStatus() {
+      const job = window.repairJobs.find(j => j.id === selectedJobId);
+      if (job) {
+        const newStatus = document.getElementById('adminStatusSelect').value;
+        job.status = newStatus;
+        if (window.firebaseUpdateJob && job._fbKey) {
+          window.firebaseUpdateJob(job._fbKey, { status: newStatus });
+        } else {
+          localStorage.setItem('techfix_repair_jobs', JSON.stringify(window.repairJobs));
+          renderAdminQueue();
+        }
+        alert(`Status updated for ${job.id}`);
+      }
+    }
+
+    function printJobCard() {
+      const job = window.repairJobs.find(j => j.id === selectedJobId);
+      if (!job) return;
+
+      document.getElementById('pJobId').innerText = job.id;
+      document.getElementById('pDate').innerText = new Date().toLocaleDateString();
+      document.getElementById('pCust').innerText = job.customer;
+      document.getElementById('pDevice').innerText = job.device;
+      document.getElementById('pIssue').innerText = job.issue || 'General Service & Repair';
+      document.getElementById('pStatus').innerText = job.status;
+      document.getElementById('pCost').innerText = job.cost;
+
+      const output = document.getElementById('jobCardOutput');
+      output.style.display = 'block';
+
+      window.print();
+    }
+  </script>
+
+  <!-- Firebase Modular SDK Sync -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, update, remove, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCldZOjq8keTKp2IYzek1a7rFtnx9xSkNw",
+      authDomain: "jerish-543a2.firebaseapp.com",
+      databaseURL: "https://jerish-543a2-default-rtdb.firebaseio.com",
+      projectId: "jerish-543a2",
+      storageBucket: "jerish-543a2.firebasestorage.app",
+      messagingSenderId: "870423349929",
+      appId: "1:870423349929:web:e3d38f26d7d2e11b7d77b8",
+      measurementId: "G-7B9HTVCMQK"
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      window.firebasePushMessage = (msg) => push(ref(db, 'support_chat'), msg);
+      window.firebasePushJob = (job) => push(ref(db, 'repair_jobs'), job);
+      window.firebasePushComplaint = (c) => push(ref(db, 'customer_complaints'), c);
+
+      // ---------------- CUSTOMER ACCOUNT SYNC ----------------
+      // Store only a SHA-256 password hash in Firebase, never the plain password.
+      const customerKey = (phone) => String(phone).replace(/[^0-9]/g, '');
+
+      async function hashCustomerPassword(password) {
+        const data = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      window.firebaseRegisterCustomer = async ({ name, phone, pass }) => {
+        const key = customerKey(phone);
+        if (!key || key.length < 10) {
+          return { ok: false, message: 'Please enter a valid phone number.' };
+        }
+        if (!pass || pass.length < 4) {
+          return { ok: false, message: 'Password must be at least 4 characters.' };
+        }
+
+        const customerRef = ref(db, 'customers/' + key);
+        const snapshot = await get(customerRef);
+        if (snapshot.exists()) {
+          return { ok: false, message: 'Phone number already registered. Please login.' };
+        }
+
+        const passwordHash = await hashCustomerPassword(pass);
+        await set(customerRef, {
+          name: name || 'Customer',
+          phone: phone,
+          passwordHash: passwordHash
+        });
+
+        return { ok: true };
+      };
+
+      window.firebaseLoginCustomer = async (phone, pass) => {
+        const key = customerKey(phone);
+        if (!key) return { ok: false, message: 'Incorrect phone or password' };
+
+        const snapshot = await get(ref(db, 'customers/' + key));
+        if (!snapshot.exists()) {
+          return { ok: false, message: 'Incorrect phone or password' };
+        }
+
+        const data = snapshot.val();
+        const passwordHash = await hashCustomerPassword(pass);
+        if (data.passwordHash !== passwordHash) {
+          return { ok: false, message: 'Incorrect phone or password' };
+        }
+
+        return {
+          ok: true,
+          customer: { name: data.name || 'Customer', phone: data.phone || phone }
+        };
+      };
+
+      // One-time migration: move existing PC-only local accounts into Firebase.
+      // This allows an account already created on the PC to work on the phone.
+      (async () => {
+        try {
+          const localCustomers = JSON.parse(localStorage.getItem('techfix_customers') || '[]');
+          for (const customer of localCustomers) {
+            if (!customer.phone || !customer.pass) continue;
+            const key = customerKey(customer.phone);
+            if (!key) continue;
+            const customerRef = ref(db, 'customers/' + key);
+            const existing = await get(customerRef);
+            if (!existing.exists()) {
+              await set(customerRef, {
+                name: customer.name || 'Customer',
+                phone: customer.phone,
+                passwordHash: await hashCustomerPassword(customer.pass)
+              });
+            }
+          }
+        } catch (migrationError) {
+          console.warn('Customer account migration skipped:', migrationError);
+        }
+      })();
+
+      // These write an in-place change to the SPECIFIC record's own Firebase key,
+      // instead of push() (which only ever creates brand-new records). Without
+      // these, a status edit only ever lived in localStorage and got silently
+      // reverted the next time onValue below re-synced from the cloud data.
+      window.firebaseUpdateComplaint = (fbKey, updates) => update(ref(db, 'customer_complaints/' + fbKey), updates);
+      window.firebaseRemoveComplaint = (fbKey) => remove(ref(db, 'customer_complaints/' + fbKey));
+      window.firebaseUpdateJob = (fbKey, updates) => update(ref(db, 'repair_jobs/' + fbKey), updates);
+
+      onValue(ref(db, 'support_chat'), (snapshot) => {
+        const data = snapshot.val();
+        window.chatMessages = data ? Object.values(data) : [];
+        if (typeof window.renderChatMessages === 'function') window.renderChatMessages();
+      });
+
+      onValue(ref(db, 'repair_jobs'), (snapshot) => {
+        const data = snapshot.val();
+        // Keep each record's own Firebase key (_fbKey) so a later status edit
+        // can be written back to that exact node instead of a random new one.
+        window.repairJobs = data ? Object.keys(data).map(k => ({ ...data[k], _fbKey: k })) : [];
+        if (typeof window.renderAdminQueue === 'function') window.renderAdminQueue();
+      });
+
+      onValue(ref(db, 'customer_complaints'), (snapshot) => {
+        const data = snapshot.val();
+        window.customerComplaints = data ? Object.keys(data).map(k => ({ ...data[k], _fbKey: k })) : [];
+        if (typeof window.renderAdminQueue === 'function') window.renderAdminQueue();
+        if (typeof window.renderCustomerComplaints === 'function') window.renderCustomerComplaints();
+      });
+    } catch (err) {
+      console.warn('Firebase initialized with local fallback variables.', err);
+    }
+  </script>
+</body>
+</html>
