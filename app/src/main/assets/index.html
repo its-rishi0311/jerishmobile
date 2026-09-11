@@ -647,6 +647,7 @@
                   <th>Device / Model</th>
                   <th>Issue Details</th>
                   <th>Status</th>
+                  <th>Amount (₹)</th>
                 </tr>
               </thead>
               <tbody id="custComplaintsTableBody"></tbody>
@@ -744,11 +745,11 @@
                 <div>
                   <strong>Jerish Mobile Sales & Service</strong><br>
                   Authorized Retail & Repair Center<br>
-                  Open Mon–Sat: 9:00 AM – 9:00 PM
+                  Open Mon–Sat: 9:00 AM – 1:00 PM,6:00PM – 9:00PM;Sun:6:00PM – 9:00PM.
                 </div>
                 <div style="text-align: right;">
                   <br>
-                  Jerish<br>
+                  Bala Murugan<br>
                   <strong>Authorized Signatory</strong>
                 </div>
               </div>
@@ -912,6 +913,7 @@
                   <th>Category</th>
                   <th>Device Model</th>
                   <th>Reported Complaint</th>
+                  <th>Amount (₹)</th>
                   <th>Status</th>
                   <th>Action</th>
                 </tr>
@@ -1303,78 +1305,29 @@
       document.getElementById('customerRegisterForm').classList.toggle('page-view', view !== 'register');
     }
 
-    // Customer accounts are synced through Firebase so the same account can be
-    // used on PC, phone and other devices. localStorage is kept only as an
-    // offline fallback/cache.
-    async function handleCustomerRegister(e) {
+    function handleCustomerRegister(e) {
       e.preventDefault();
-      const name = document.getElementById('custRegName').value.trim();
-      const phone = document.getElementById('custRegPhone').value.trim();
+      const name = document.getElementById('custRegName').value;
+      const phone = document.getElementById('custRegPhone').value;
       const pass = document.getElementById('custRegPass').value;
 
-      if (window.firebaseRegisterCustomer) {
-        try {
-          const result = await window.firebaseRegisterCustomer({ name, phone, pass });
-          if (!result.ok) {
-            alert(result.message || 'Phone number already registered. Please login.');
-            return;
-          }
-
-          const customer = { name, phone };
-          registeredCustomers = registeredCustomers.filter(c => c.phone !== phone);
-          registeredCustomers.push(customer);
-          localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
-
-          alert('Registration successful!');
-          document.getElementById('custRegName').value = '';
-          document.getElementById('custRegPhone').value = '';
-          document.getElementById('custRegPass').value = '';
-          toggleCustomerAuth('login');
-          return;
-        } catch (err) {
-          console.error('Firebase registration failed:', err);
-          alert('Unable to connect to the online account system. Please try again.');
-          return;
-        }
-      }
-
-      // Offline/local fallback.
-      if (registeredCustomers.some(c => c.phone === phone && c.pass === pass)) {
+      if (registeredCustomers.some(c => c.phone === phone)) {
         alert('Phone number already registered. Please login.');
         return;
       }
+
       const newCustomer = { name, phone, pass };
       registeredCustomers.push(newCustomer);
       localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
+
       alert('Registration successful!');
       toggleCustomerAuth('login');
     }
 
-    async function handleCustomerLogin(e) {
+    function handleCustomerLogin(e) {
       e.preventDefault();
-      const phone = document.getElementById('custLoginPhone').value.trim();
+      const phone = document.getElementById('custLoginPhone').value;
       const pass = document.getElementById('custLoginPass').value;
-
-      if (window.firebaseLoginCustomer) {
-        try {
-          const result = await window.firebaseLoginCustomer(phone, pass);
-          if (result.ok && result.customer) {
-            const customer = result.customer;
-            localStorage.setItem('techfix_active_user', JSON.stringify(customer));
-            // Keep a local cache for offline fallback.
-            registeredCustomers = registeredCustomers.filter(c => c.phone !== customer.phone);
-            registeredCustomers.push(customer);
-            localStorage.setItem('techfix_customers', JSON.stringify(registeredCustomers));
-            autoLoginCustomer(customer);
-          } else {
-            alert(result.message || 'Incorrect phone or password');
-          }
-          return;
-        } catch (err) {
-          console.error('Firebase login failed:', err);
-          // Try the local cache if the device is temporarily offline.
-        }
-      }
 
       const customer = registeredCustomers.find(c => c.phone === phone && c.pass === pass);
       if (customer) {
@@ -1458,6 +1411,7 @@
           <td>${c.deviceModel}</td>
           <td>${c.description}</td>
           <td><span class="badge ${complaintStatusBadgeClass(c.status)}">${c.status}</span></td>
+          <td>₹${c.amount || 0}</td>
         </tr>
       `).join('');
     }
@@ -1828,6 +1782,22 @@ function generateCartBill() {
             <td>${c.deviceModel}</td>
             <td>${c.description}</td>
             <td>
+              <input
+                type="number" 
+                value="${c.amount || ''}" 
+                placeholder="₹ 0" 
+                style="width: 80px; padding: 6px 8px; font-size: 0.82rem; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); border-radius: var(--radius-sm);" 
+                onchange="updateComplaintAmount('${c.id}', this.value)"
+              >
+              <button 
+                class="btn-sm" 
+                style="padding: 4px 8px; font-size: 0.75rem; background: var(--accent-primary, #3b82f6); color: white;"
+                onclick="updateComplaintAmount('${c.id}', document.getElementById('amount-${c.id}').value)"
+              >
+                Save
+              </button>
+            </td>
+            <td>
               <select class="complaint-status-select" style="width:auto; padding: 6px 8px; font-size: 0.82rem;" onchange="updateComplaintStatus('${c.id}', this.value)">
                 <option value="Pending" ${c.status === 'Pending' ? 'selected' : ''}>Pending</option>
                 <option value="In Progress" ${c.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
@@ -1910,6 +1880,48 @@ function generateCartBill() {
     document.getElementById('adminHomeView').classList.add('active');
     document.getElementById('adminJobDetailsView').classList.remove('active');
   }
+  function updateComplaintStatus(tktId, newStatus) {
+      const complaint = window.customerComplaints.find(c => c.id === tktId);
+      if (complaint) {
+        complaint.status = newStatus;
+        if (window.firebaseUpdateComplaint && complaint._fbKey) {
+          window.firebaseUpdateComplaint(complaint._fbKey, { status: newStatus });
+        } else {
+          localStorage.setItem('techfix_customer_complaints', JSON.stringify(window.customerComplaints));
+          renderAdminQueue();
+          renderCustomerComplaints();
+        }
+      }
+    }
+
+    // --- ADD YOUR NEW FUNCTION HERE ---
+    function updateComplaintAmount(tktId, newAmount) {
+      const complaint = window.customerComplaints.find(c => c.id === tktId);
+      if (complaint) {
+        complaint.amount = newAmount;
+
+        // Sync with repair jobs if a matching job exists
+        if (window.repairJobs) {
+          const matchingJob = window.repairJobs.find(job => job.ticketId === tktId || job.id === tktId);
+          if (matchingJob) {
+            matchingJob.cost = '₹' + newAmount;
+            if (window.firebaseUpdateJob && matchingJob._fbKey) {
+              window.firebaseUpdateJob(matchingJob._fbKey, { cost: '₹' + newAmount });
+            } else {
+              localStorage.setItem('techfix_repair_jobs', JSON.stringify(window.repairJobs));
+            }
+          }
+        }
+
+        // Save complaint changes
+        if (window.firebaseUpdateComplaint && complaint._fbKey) {
+          window.firebaseUpdateComplaint(complaint._fbKey, { amount: newAmount });
+        } else {
+          localStorage.setItem('techfix_customer_complaints', JSON.stringify(window.customerComplaints));
+          renderAdminQueue();
+        }
+      }
+    }
 
     function createNewJob(e) {
       e.preventDefault();
@@ -1973,7 +1985,7 @@ function generateCartBill() {
   <!-- Firebase Modular SDK Sync -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, update, remove, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCldZOjq8keTKp2IYzek1a7rFtnx9xSkNw",
@@ -1993,87 +2005,6 @@ function generateCartBill() {
       window.firebasePushMessage = (msg) => push(ref(db, 'support_chat'), msg);
       window.firebasePushJob = (job) => push(ref(db, 'repair_jobs'), job);
       window.firebasePushComplaint = (c) => push(ref(db, 'customer_complaints'), c);
-
-      // ---------------- CUSTOMER ACCOUNT SYNC ----------------
-      // Store only a SHA-256 password hash in Firebase, never the plain password.
-      const customerKey = (phone) => String(phone).replace(/[^0-9]/g, '');
-
-      async function hashCustomerPassword(password) {
-        const data = new TextEncoder().encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(hashBuffer))
-          .map(b => b.toString(16).padStart(2, '0')).join('');
-      }
-
-      window.firebaseRegisterCustomer = async ({ name, phone, pass }) => {
-        const key = customerKey(phone);
-        if (!key || key.length < 10) {
-          return { ok: false, message: 'Please enter a valid phone number.' };
-        }
-        if (!pass || pass.length < 4) {
-          return { ok: false, message: 'Password must be at least 4 characters.' };
-        }
-
-        const customerRef = ref(db, 'customers/' + key);
-        const snapshot = await get(customerRef);
-        if (snapshot.exists()) {
-          return { ok: false, message: 'Phone number already registered. Please login.' };
-        }
-
-        const passwordHash = await hashCustomerPassword(pass);
-        await set(customerRef, {
-          name: name || 'Customer',
-          phone: phone,
-          passwordHash: passwordHash
-        });
-
-        return { ok: true };
-      };
-
-      window.firebaseLoginCustomer = async (phone, pass) => {
-        const key = customerKey(phone);
-        if (!key) return { ok: false, message: 'Incorrect phone or password' };
-
-        const snapshot = await get(ref(db, 'customers/' + key));
-        if (!snapshot.exists()) {
-          return { ok: false, message: 'Incorrect phone or password' };
-        }
-
-        const data = snapshot.val();
-        const passwordHash = await hashCustomerPassword(pass);
-        if (data.passwordHash !== passwordHash) {
-          return { ok: false, message: 'Incorrect phone or password' };
-        }
-
-        return {
-          ok: true,
-          customer: { name: data.name || 'Customer', phone: data.phone || phone }
-        };
-      };
-
-      // One-time migration: move existing PC-only local accounts into Firebase.
-      // This allows an account already created on the PC to work on the phone.
-      (async () => {
-        try {
-          const localCustomers = JSON.parse(localStorage.getItem('techfix_customers') || '[]');
-          for (const customer of localCustomers) {
-            if (!customer.phone || !customer.pass) continue;
-            const key = customerKey(customer.phone);
-            if (!key) continue;
-            const customerRef = ref(db, 'customers/' + key);
-            const existing = await get(customerRef);
-            if (!existing.exists()) {
-              await set(customerRef, {
-                name: customer.name || 'Customer',
-                phone: customer.phone,
-                passwordHash: await hashCustomerPassword(customer.pass)
-              });
-            }
-          }
-        } catch (migrationError) {
-          console.warn('Customer account migration skipped:', migrationError);
-        }
-      })();
 
       // These write an in-place change to the SPECIFIC record's own Firebase key,
       // instead of push() (which only ever creates brand-new records). Without
